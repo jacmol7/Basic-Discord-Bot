@@ -1,30 +1,30 @@
 const fs = require('fs');
 
-exports.ping = msg => {
+exports.ping = (msg, client) => {
   msg.reply('pong');
 }
 
-exports.pong = msg => {
+exports.pong = (msg, client) => {
   msg.reply('are you also a bot?');
 }
 
-exports.goodbye = msg => {
+exports.goodbye = (msg, client) => {
   msg.reply('bye, have a nice time!');
 }
 
-exports.time = msg => {
+exports.time = (msg, client) => {
   const date = new Date();
   const time = date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds()
   msg.reply('The time is ' + time);
 }
 
-exports.say = msg => {
+exports.say = (msg, client) => {
   if(msg.content.length > 4){
     msg.channel.send(msg.content.slice(4));
   }
 }
 
-exports.join = msg => {
+exports.join = (msg, client) => {
   // message must be from server
   if(!msg.guild) return;
 
@@ -32,27 +32,21 @@ exports.join = msg => {
     msg.member.voiceChannel.join().then(connection => {
       msg.channel.send('I\'ve joined \'' + msg.member.voiceChannel.name + '\'');
       const dispatcher = connection.playFile('Air_Horn.m4a');
-
-      var recordFile = fs.createWriteStream('recording.opus');
-      const audioReciever = connection.createReceiver();
-      for(var [id, member] of connection.channel.members) {
-        if(member.user.username === 'jacmol7') {
-          const opusStream = audioReciever.createOpusStream(member.user);
-          auidoReciever.on('opus', (user, buffer) => {
-            for(var value of buffer.values()) {
-              recordFile.write(value);
-            }
-          });
-        }
-      }
     }).catch(console.log);
   } else {
     msg.reply('You need to join a voice channel first');
   }
 }
 
-exports.leave = msg => {
-  //if(msg.guild )
+exports.leave = (msg, client) => {
+  if(msg.guild) {
+    if(client.voiceConnections.has(msg.guild.id)) {
+      client.voiceConnections.get(msg.guild.id).disconnect();
+      msg.reply('Bye!');
+    } else {
+      msg.reply('I am not in any voice channels');
+    }
+  }
 }
 
 

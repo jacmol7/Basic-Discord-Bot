@@ -44,33 +44,37 @@ function runCommand(msg) {
     switch(command) {
 
       case "ping":
-        commands.ping(msg);
+        commands.ping(msg, client);
         break;
 
       case "pong":
-        commands.pong(msg);
+        commands.pong(msg, client);
         break;
 
       case "goodbye":
-        commands.goodbye(msg);
+        commands.goodbye(msg, client);
         break;
 
       case "time":
-        commands.time(msg);
+        commands.time(msg, client);
         break;
 
       case "say":
-        commands.say(msg);
+        commands.say(msg, client);
         break;
 
       case "join":
-        commands.join(msg);
+        commands.join(msg, client);
+        break;
+
+      case "leave":
+        commands.leave(msg, client);
         break;
 
       case "connections":
         console.log(client.voiceConnections);
         break;
-        
+
     }
   }
 }
