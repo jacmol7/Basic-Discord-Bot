@@ -31,7 +31,6 @@ exports.join = (msg, client) => {
   if(msg.member.voiceChannel) {
     msg.member.voiceChannel.join().then(connection => {
       msg.channel.send('I\'ve joined \'' + msg.member.voiceChannel.name + '\'');
-      const dispatcher = connection.playFile('Air_Horn.m4a');
     }).catch(console.log);
   } else {
     msg.reply('You need to join a voice channel first');
@@ -46,6 +45,21 @@ exports.leave = (msg, client) => {
     } else {
       msg.reply('I am not in any voice channels');
     }
+  }
+}
+
+exports.play = (msg, client) => {
+  if(!msg.guild) {
+    return;
+  }
+  const args = getArgs(msg);
+  var file = '';
+  for(var part of args) {
+    file += part;
+  }
+  if(client.voiceConnections.has(msg.guild.id)) {
+    const voiceConnection = client.voiceConnections.get(msg.guild.id);
+    voiceConnection.playArbitraryInput(file);
   }
 }
 

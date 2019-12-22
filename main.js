@@ -71,6 +71,10 @@ function runCommand(msg) {
         commands.leave(msg, client);
         break;
 
+      case "play":
+        commands.play(msg, client);
+        break;
+
       case "connections":
         console.log(client.voiceConnections);
         break;

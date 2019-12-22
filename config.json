@@ -15,6 +15,7 @@
     "say":2,
     "join":0,
     "leave":0,
+    "play":0,
     "connections":0
   }
 }
