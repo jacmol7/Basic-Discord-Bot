@@ -1,1 +1,1 @@
-node main.js config.json
+node main.js

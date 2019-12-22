@@ -3,7 +3,10 @@ const fs = require('fs');
 const commands = require('./commands.js');
 const client = new discord.Client();
 
-const config = JSON.parse(fs.readFileSync(process.argv[2]));
+const config = JSON.parse(fs.readFileSync('config.json'));
+const keys = JSON.parse(fs.readFileSync('keys.json'));
+const discordToken = keys.discord;
+const youtubeToken = keys.youtube;
 
 client.on('ready', () => {
   console.log('logged in as '+ client.user.tag);
@@ -98,4 +101,4 @@ function hasPermission(msg) {
   return false;
 }
 
-client.login(config.token);
+client.login(discordToken);
