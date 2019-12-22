@@ -1,0 +1,19 @@
+{
+  "token": "MzkzMTAxNjQ0MTQyODcwNTI5.Xful3w.2RCcEwJTowXtuPUioZRBJan1Yes",
+  "trigger": "!",
+  "channel": "bot",
+  "permissions": {
+    "0":["@everyone"],
+    "1":["moderator"],
+    "2":["admin"]
+  },
+  "commands": {
+    "ping":0,
+    "pong":0,
+    "goodbye":0,
+    "time":0,
+    "say":2,
+    "join":0,
+    "connections":0
+  }
+}
