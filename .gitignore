@@ -1,0 +1,3 @@
+keys.json
+*.exe
+/node_modules
