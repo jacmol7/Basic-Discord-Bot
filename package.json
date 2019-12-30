@@ -12,6 +12,6 @@
     "bufferutil": "^4.0.1",
     "discord.js": "^11.5.1",
     "node-opus": "^0.3.3",
-    "pouchdb": "^7.1.1"
+    "ytdl-core": "^1.0.5"
   }
 }

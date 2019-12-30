@@ -1,4 +1,21 @@
 const fs = require('fs');
+const https = require('https');
+const ytdl = require('ytdl-core');
+
+const audioQueueModule = require('./audioQueue.js');
+const AudioQueue = audioQueueModule.AudioQueue;
+
+const audioTrackModule = require('./audioTrack.js');
+const AudioTrack = audioTrackModule.AudioTrack;
+const audioTypes = audioTrackModule.audioTypes;
+
+const keys = JSON.parse(fs.readFileSync('keys.json'));
+const youtubeKey = keys.youtube;
+var audioQueue;
+
+exports.createAudioQueue = (client) => {
+  audioQueue = new AudioQueue(client);
+}
 
 exports.ping = (msg, client) => {
   msg.reply('pong');
@@ -52,20 +69,66 @@ exports.play = (msg, client) => {
   if(!msg.guild) {
     return;
   }
+
+  if(!client.voiceConnections.has(msg.guild.id)) {
+    msg.reply('You need to place me in a voice channel using \'join\' first');
+    return;
+  }
+
+  if(msg.member.voiceChannel != client.voiceConnections.get(msg.guild.id).channel) {
+    msg.reply('You need to place me in the same voice channel as you using \'join\' first');
+    return;
+  }
+
   const args = getArgs(msg);
   var file = '';
   for(var part of args) {
     file += part;
   }
-  if(client.voiceConnections.has(msg.guild.id)) {
-    const voiceConnection = client.voiceConnections.get(msg.guild.id);
-    voiceConnection.playArbitraryInput(file);
-  }
+
+  const voiceConnection = client.voiceConnections.get(msg.guild.id);
+  voiceConnection.playArbitraryInput('media/'+file);
 }
 
+exports.youtube = (msg, client) => {
+  const query = escape(getArg(msg));
+  var options = {
+    hostname: 'www.googleapis.com',
+    port: 443,
+    path: '/youtube/v3/search?part=snippet&maxResults=5&q='+query+'&key='+youtubeKey,
+    method: 'GET'
+  }
+
+  const req = https.request(options, res => {
+    var result = ''
+
+    res.on('data', data => {
+      result += data.toString();
+    });
+
+    res.on('end', () => {
+      const resultJson = JSON.parse(result);
+      var videos = 'Videos for \''+query+'\'```';
+      for(var i = 0; i < resultJson.items.length; i++) {
+        videos += i+1 + ': ' + resultJson.items[i].snippet.title + '\n';
+      }
+      videos += '```';
+      msg.channel.send(videos);
+    });
+  });
+  req.end();
+};
+
+exports.audioTrackTest = (msg, client) => {
+  let track = new AudioTrack(audioTypes.youtube, "yeet");
+}
 
 function getArgs(msg) {
   var args = msg.content.split(' ');
   args.splice(0,1);
   return args;
+}
+
+function getArg(msg) {
+  return msg.content.slice(msg.content.indexOf(' ')+1);
 }
