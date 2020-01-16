@@ -1,6 +1,7 @@
 const fs = require('fs');
 const https = require('https');
 const ytdl = require('ytdl-core');
+const commandUtils = require('./commandUtils.js');
 
 const audioQueueModule = require('./audioQueue.js');
 const AudioQueue = audioQueueModule.AudioQueue;
@@ -21,7 +22,7 @@ exports.createAudioQueue = (client) => {
 
   audioQueue.on('playing', (track, guild) => {
     console.log('Playing track: ' + track + ' in guild: ' + guild);
-    sendMessage(client, guild, 'Now playing \'' + track + '\'')
+    commandUtils.sendMessage(client, guild, 'Now playing \'' + track + '\'')
   });
 }
 
@@ -88,7 +89,7 @@ exports.play = (msg, client) => {
     return;
   }
 
-  const args = getArgs(msg);
+  const args = commandUtils.getArgs(msg);
   var file = '';
   for(var part of args) {
     file += part;
@@ -99,7 +100,7 @@ exports.play = (msg, client) => {
 }
 
 exports.youtube = (msg, client) => {
-  const query = getArg(msg);
+  const query = commandUtils.getArg(msg);
   const queryEncoded = query.replace(/ /g, '+')
   console.log(queryEncoded);
   var options = {
@@ -153,7 +154,7 @@ exports.select = (msg, client) => {
     return false;
   }
 
-  let playing = audioQueue.selectOption(msg.guild.id, msg.member, getArg(msg))
+  let playing = audioQueue.selectOption(msg.guild.id, msg.member, commandUtils.getArg(msg))
   if(playing) {
     msg.reply('Added \''+ playing + '\' to queue');
   } else {
@@ -163,32 +164,4 @@ exports.select = (msg, client) => {
 
 exports.next = (msg, client) => {
   audioQueue.play(msg.guild.id);
-}
-
-function sendMessage(client, guildID, message) {
-  if(client.guilds.has(guildID)) {
-    let guild = client.guilds.get(guildID);
-    let botChannel = null;
-    for(let channel of guild.channels.array()) {
-      if(channel.name === config.channel && channel.type === 'text') {
-        botChannel = channel;
-        break;
-      }
-    }
-    if(botChannel != null) {
-        botChannel.send(message);
-        return true;
-    }
-  }
-  return false;
-}
-
-function getArgs(msg) {
-  var args = msg.content.split(' ');
-  args.splice(0,1);
-  return args;
-}
-
-function getArg(msg) {
-  return msg.content.slice(msg.content.indexOf(' ')+1);
 }
