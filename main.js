@@ -85,6 +85,15 @@ function runCommand(msg) {
       case "audioTrackTest":
         commands.audioTrackTest(msg, client);
         break;
+
+      case "select":
+        commands.select(msg, client);
+        break;
+
+      case "next":
+        commands.next(msg, client);
+        break;
+        
     }
   }
 }

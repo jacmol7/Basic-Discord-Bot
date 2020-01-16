@@ -16,6 +16,8 @@
     "leave":0,
     "play":0,
     "youtube":0,
-    "audioTrackTest":0
+    "next":0,
+    "audioTrackTest":0,
+    "select":0
   }
 }
