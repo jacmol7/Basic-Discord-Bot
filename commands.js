@@ -24,6 +24,10 @@ exports.createAudioQueue = (client) => {
     console.log('Playing track: ' + track + ' in guild: ' + guild);
     commandUtils.sendMessage(client, guild, 'Now playing \'' + track + '\'')
   });
+
+  audioQueue.on('message', (message, guild) => {
+    commandUtils.sendMessage(client, guild, message);
+  });
 }
 
 exports.ping = (msg, client) => {

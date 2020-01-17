@@ -53,23 +53,31 @@ class AudioQueue extends EventEmitter {
   }
 
   play(guild, track = null) {
+    //play next track in queue if nothing is specified
     if(track == null) {
       track = this.getNextInQueue(guild);
       console.log(track);
       if(!track) {
+        this.emit('message', 'Reached end of queue', guild);
         return false;
       }
     }
-    console.log(track);
+
     if(this.client.voiceConnections.has(guild)) {
       let voiceConnection = this.client.voiceConnections.get(guild);
-      voiceConnection.playStream(track.play());
-      console.log('now playing?');
+      let audioStream = track.play();
+
+      //play next track after current track ends
+      audioStream.on('end', () => {
+        this.play(guild);
+      });
+
+      voiceConnection.playStream(audioStream);
+
       this.emit('playing', track.title, guild);
       return track.title;
     }
     else {
-      console.log('no voice connection');
       return false;
     }
   }
