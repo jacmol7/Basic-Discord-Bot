@@ -37,7 +37,7 @@ class AudioQueue extends EventEmitter {
       }
     }
 
-    play(guild, track);
+    this.play(guild, track);
   }
 
   pause(guild) {
@@ -52,11 +52,24 @@ class AudioQueue extends EventEmitter {
     return false;
   }
 
+  stop(guild) {
+    // pause playing for guild
+    if(this.playing.has(guild)) {
+      let track = this.playing.get(guild);
+      if(track != null) {
+        track.stop();
+        this.emit('message', 'Stopped track', guild);
+        return true;
+      }
+    }
+    return false;
+  }
+
   play(guild, track = null) {
+    console.log('playing');
     //play next track in queue if nothing is specified
-    if(track == null) {
+    if(track === null) {
       track = this.getNextInQueue(guild);
-      console.log(track);
       if(!track) {
         this.emit('message', 'Reached end of queue', guild);
         return false;
@@ -68,12 +81,14 @@ class AudioQueue extends EventEmitter {
       let audioStream = track.play();
 
       //play next track after current track ends
-      audioStream.on('end', () => {
+      audioStream.on('close', () => {
+        this.playing.set(guild, null);
         this.play(guild);
       });
 
       voiceConnection.playStream(audioStream);
 
+      this.playing.set(guild, track);
       this.emit('playing', track.title, guild);
       return track.title;
     }
@@ -104,10 +119,15 @@ class AudioQueue extends EventEmitter {
     // used to select one of the given options and add it to the queue
     if(this.choices.has(guild)) {
       if(this.choices.get(guild).has(user.id)) {
-        if(this.choices.get(guild).get(user.id).length >= choice) {
+        if(this.choices.get(guild).get(user.id).length >= choice && choice > 0) {
           let track = this.choices.get(guild).get(user.id)[choice - 1];
           this.choices.get(guild).delete(user.id);
-          this.add(guild, track);
+          if(!this.playing.get(guild)) {
+            this.play(guild, track);
+          } else {
+            this.add(guild, track);
+            this.emit('message', 'Added to queue:```' + track.title + '```')
+          }
           return track.title;
         }
       }

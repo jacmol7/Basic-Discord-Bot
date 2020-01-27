@@ -4,6 +4,8 @@ const fs = require('fs');
 
 const types = {
   "youtube":"youtube",
+  "youtubeLive":"youtubeLive",
+  "youtubeLiveChannel":"youtubeLiveChannel",
   "file":"file"
 }
 
@@ -13,15 +15,28 @@ class AudioTrack extends EventEmitter {
     this.type = type;
     this.source = source;
     this.title = title;
+    this.stream;
   }
 
   play() {
-    if(this.type === types.youtube) {
-      console.log(this.source);
-      const url = 'http://www.youtube.com/watch?v=' + this.source;
-      return ytdl(url, {'filter': 'audioonly'});
-    } else {
-      return fs.createReadStream(source);
+    let url;
+    switch(this.type) {
+      case types.youtube:
+        url = 'http://www.youtube.com/watch?v=' + this.source;
+        this.stream = ytdl(url, {'filter': 'audioonly'});
+        return this.stream;
+
+      case types.youtubeLive:
+        url = 'http://www.youtube.com/watch?v=' + this.source;
+        this.stream = ytdl(url, {'filter': 'audioonly', 'liveBuffer': 0});
+        return this.stream
+
+      case types.youtubeLiveChannel:
+        break;
+
+      case types.file:
+        this.stream = fs.createReadStream(this.source);
+        return this.stream;
     }
   }
 
@@ -30,7 +45,7 @@ class AudioTrack extends EventEmitter {
   }
 
   stop() {
-
+    this.stream.destroy();
   }
 }
 

@@ -22,7 +22,7 @@ exports.createAudioQueue = (client) => {
 
   audioQueue.on('playing', (track, guild) => {
     console.log('Playing track: ' + track + ' in guild: ' + guild);
-    commandUtils.sendMessage(client, guild, 'Now playing \'' + track + '\'')
+    commandUtils.sendMessage(client, guild, 'Now playing: ```' + track + '```');
   });
 
   audioQueue.on('message', (message, guild) => {
@@ -105,8 +105,7 @@ exports.play = (msg, client) => {
 
 exports.youtube = (msg, client) => {
   const query = commandUtils.getArg(msg);
-  const queryEncoded = query.replace(/ /g, '+')
-  console.log(queryEncoded);
+  const queryEncoded = query.replace(/ /g, '+');
   var options = {
     hostname: 'www.googleapis.com',
     port: 443,
@@ -135,7 +134,25 @@ exports.youtube = (msg, client) => {
       // add the search results as choices to the audioQueue
       let choices = [];
       for(var video of resultJson.items) {
-        choices.push(new AudioTrack(audioTypes.youtube, video.id.videoId, video.snippet.title));
+        //video
+        if(video.snippet.liveBroadcastContent == 'none') {
+          console.log('normal');
+          choices.push(new AudioTrack(audioTypes.youtube, video.id.videoId, video.snippet.title));
+        }
+        //live channel
+        else if(video.id.channelId && video.snippet.liveBroadcastContent == 'live') {
+          console.log('live channel');
+          choices.push(new AudioTrack(audioTypes.youtubeLiveChannel, video.id.channelId, video.snippet.title));
+        }
+        //live video
+        else if(video.id.videoId && video.snippet.liveBroadcastContent == 'live') {
+          console.log('live video');
+          choices.push(new AudioTrack(audioTypes.youtubeLive, video.id.videoId, video.snippet.title));
+        }
+        else {
+          console.log('track is either an upcoming live video or invalid');
+          console.log(video);
+        }
       }
       audioQueue.addOption(msg.guild.id, msg.member.id, choices);
     });
@@ -159,13 +176,17 @@ exports.select = (msg, client) => {
   }
 
   let playing = audioQueue.selectOption(msg.guild.id, msg.member, commandUtils.getArg(msg))
-  if(playing) {
-    msg.reply('Added \''+ playing + '\' to queue');
-  } else {
+  if(!playing) {
     msg.reply('Failed to add to queue');
+    return false;
   }
+  return true;
 }
 
 exports.next = (msg, client) => {
   audioQueue.play(msg.guild.id);
+}
+
+exports.stop = (msg, client) => {
+  audioQueue.stop(msg.guild.id);
 }
