@@ -29,3 +29,24 @@ exports.getArgs = (msg) => {
 exports.getArg = (msg) => {
   return msg.content.slice(msg.content.indexOf(' ')+1);
 }
+
+exports.inSameVoiceChannel = (client, msg) => {
+  // stop if the message is a private message
+  if(!msg.guild) {
+    return;
+  }
+
+  let clientChannel;
+  if(client.voiceConnections.get(msg.guild.id)) {
+    clientChannel = client.voiceConnections.get(msg.guild.id).channel.id;
+  }
+  const userChannel = msg.member.voiceChannelID;
+
+  if(clientChannel && userChannel) {
+    if(clientChannel == userChannel) {
+      return true;
+    }
+  }
+
+  return false;
+}

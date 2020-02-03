@@ -79,18 +79,9 @@ exports.leave = (msg, client) => {
 }
 
 exports.play = (msg, client) => {
-  if(!msg.guild) {
-    return;
-  }
-
-  if(!client.voiceConnections.has(msg.guild.id)) {
-    msg.reply('You need to place me in a voice channel using \'join\' first');
-    return;
-  }
-
-  if(msg.member.voiceChannel != client.voiceConnections.get(msg.guild.id).channel) {
-    msg.reply('You need to place me in the same voice channel as you using \'join\' first');
-    return;
+  if(!commandUtils.inSameVoiceChannel(client, msg)) {
+    msg.reply('You need to be in the same voice channel as me');
+    return false;
   }
 
   const args = commandUtils.getArgs(msg);
@@ -161,21 +152,12 @@ exports.youtube = (msg, client) => {
 };
 
 exports.select = (msg, client) => {
-  if(!msg.guild) {
+  if(!commandUtils.inSameVoiceChannel(client, msg)) {
+    msg.reply('You need to be in the same voice channel as me');
     return false;
   }
 
-  if(client.voiceConnections.has(msg.guild)) {
-    msg.reply('You need to join me into a voice channel first');
-    return false;
-  }
-
-  if(msg.member.voiceChannel != client.voiceConnections.get(msg.guild.id).channel) {
-    msg.reply('You must be in the same voice channel as me to start playing something');
-    return false;
-  }
-
-  let playing = audioQueue.selectOption(msg.guild.id, msg.member, commandUtils.getArg(msg))
+  let playing = audioQueue.selectOption(msg.guild.id, msg.member, commandUtils.getArg(msg));
   if(!playing) {
     msg.reply('Failed to add to queue');
     return false;
