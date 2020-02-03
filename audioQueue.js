@@ -81,7 +81,7 @@ class AudioQueue extends EventEmitter {
       let audioStream = track.play();
 
       //play next track after current track ends
-      audioStream.on('close', () => {
+      audioStream.on('end', () => {
         this.playing.set(guild, null);
         this.play(guild);
       });
