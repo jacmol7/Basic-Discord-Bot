@@ -126,7 +126,7 @@ class AudioQueue extends EventEmitter {
             this.play(guild, track);
           } else {
             this.add(guild, track);
-            this.emit('message', 'Added to queue:```' + track.title + '```')
+            this.emit('message', 'Added to queue:```' + track.title + '```', guild);
           }
           return track.title;
         }
