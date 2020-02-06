@@ -28,8 +28,14 @@ class AudioTrack extends EventEmitter {
 
       case types.youtubeLive:
         url = 'http://www.youtube.com/watch?v=' + this.source;
-        this.stream = ytdl(url, {'filter': 'audioonly', 'liveBuffer': 0});
-        return this.stream
+        this.stream = ytdl(url, {'liveBuffer': 30000,'quality':ytdl.getInfo(url, (err, info) => {
+          //find the best quality live stream
+          //the built in quality selector does not always work with live streams
+          info = info.formats;
+          info = info.filter(info => info.live);
+          return info[0].itag;
+        }) });
+        return this.stream;
 
       case types.youtubeLiveChannel:
         break;
