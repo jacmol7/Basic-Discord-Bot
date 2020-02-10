@@ -1,5 +1,8 @@
 const EventEmitter = require('events');
 
+const audioTrackModule = require('./audioTrack.js');
+const audioTypes = audioTrackModule.audioTypes;
+
 class AudioQueue extends EventEmitter {
 
   constructor(client) {
@@ -8,6 +11,7 @@ class AudioQueue extends EventEmitter {
     this.queue = new Map();
     this.choices = new Map();
     this.playing = new Map();
+    this.streamDispatchers = new Map();
   }
 
   add(guild, track) {
@@ -41,12 +45,17 @@ class AudioQueue extends EventEmitter {
   }
 
   pause(guild) {
-    // pause playing for guild
-    if(this.playing.has(guild)) {
-      let track = this.playing.get(guild);
-      if(track != null) {
-        track.pause();
-        return true;
+    let dispatcher = this.streamDispatchers.get(guild);
+    if(dispatcher) {
+      if(!dispatcher.paused) {
+        let track = this.playing.get(guild);
+        if(track.type != audioTypes.youtube) {
+          this.emit('message', 'Only youtube videos can be paused', guild);
+          return false;
+        }
+        dispatcher.pause();
+        this.emit('message', 'Paused track', guild);
+        return true
       }
     }
     return false;
@@ -67,12 +76,21 @@ class AudioQueue extends EventEmitter {
 
   play(guild, track = null) {
     console.log('playing');
-    //play next track in queue if nothing is specified
+    //if no track is specified, play the next track or resume a paused track
     if(track === null) {
-      track = this.getNextInQueue(guild);
-      if(!track) {
-        this.emit('message', 'Reached end of queue', guild);
-        return false;
+      let streamDispatcher = this.streamDispatchers.get(guild);
+      if(streamDispatcher.paused) {
+        let trackTitle = this.playing.get(guild).title;
+        streamDispatcher.resume();
+        this.emit('playing', trackTitle, guild);
+        return trackTitle;
+      }
+      else {
+        track = this.getNextInQueue(guild);
+        if(!track) {
+          this.emit('message', 'Reached end of queue', guild);
+          return false;
+        }
       }
     }
 
@@ -86,7 +104,9 @@ class AudioQueue extends EventEmitter {
         this.play(guild);
       });
 
-      voiceConnection.playStream(audioStream);
+      let streamDispatcher = voiceConnection.playStream(audioStream);
+
+      this.streamDispatchers.set(guild, streamDispatcher);
 
       this.playing.set(guild, track);
       this.emit('playing', track.title, guild);
@@ -103,6 +123,13 @@ class AudioQueue extends EventEmitter {
       if(track != null) {
         return track;
       }
+    }
+    return false;
+  }
+
+  getPlaying(guild) {
+    if(this.playing.has(guild)) {
+      return this.playing.get(guild);
     }
     return false;
   }

@@ -74,16 +74,16 @@ function runCommand(msg) {
         commands.leave(msg, client);
         break;
 
+      case "audioTrackTest":
+        commands.audioTrackTest(msg, client);
+        break;
+
       case "play":
         commands.play(msg, client);
         break;
 
       case "youtube":
         commands.youtube(msg, client);
-        break;
-
-      case "audioTrackTest":
-        commands.audioTrackTest(msg, client);
         break;
 
       case "select":
@@ -93,7 +93,10 @@ function runCommand(msg) {
       case "next":
         commands.next(msg, client);
         break;
-        
+
+      case "pause":
+        commands.pause(msg, client);
+        break;
     }
   }
 }

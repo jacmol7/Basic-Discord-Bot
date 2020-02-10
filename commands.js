@@ -78,7 +78,7 @@ exports.leave = (msg, client) => {
   }
 }
 
-exports.play = (msg, client) => {
+exports.playFile = (msg, client) => {
   if(!commandUtils.inSameVoiceChannel(client, msg)) {
     msg.reply('You need to be in the same voice channel as me');
     return false;
@@ -93,6 +93,10 @@ exports.play = (msg, client) => {
   const voiceConnection = client.voiceConnections.get(msg.guild.id);
   voiceConnection.playArbitraryInput('media/'+file);
 }
+
+exports.play = (msg, client) => {
+  audioQueue.play(msg.guild.id);
+};
 
 exports.youtube = (msg, client) => {
   const query = commandUtils.getArg(msg);
@@ -167,6 +171,10 @@ exports.select = (msg, client) => {
 
 exports.next = (msg, client) => {
   audioQueue.play(msg.guild.id);
+}
+
+exports.pause = (msg, client) => {
+  audioQueue.pause(msg.guild.id);
 }
 
 exports.stop = (msg, client) => {
