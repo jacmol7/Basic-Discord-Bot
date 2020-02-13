@@ -118,29 +118,34 @@ exports.youtube = (msg, client) => {
     res.on('end', () => {
       const resultJson = JSON.parse(result);
 
+      // remove upcoming live videos and live channels from results
+      let videoDetails = resultJson.items.filter(video => {
+        return video.id.kind !== 'youtube#channel' && video.snippet.liveBroadcastContent !== 'upcoming';
+      });
+
       // display the search results in chat
       var videos = 'Videos for \''+query+'\'```';
-      for(var i = 0; i < resultJson.items.length; i++) {
-        videos += i+1 + ': ' + resultJson.items[i].snippet.title + '\n';
+      for(var i = 0; i < videoDetails.length; i++) {
+        videos += i+1 + ': ' + videoDetails[i].snippet.title + '\n';
       }
       videos += '```';
       msg.channel.send(videos);
 
       // add the search results as choices to the audioQueue
       let choices = [];
-      for(var video of resultJson.items) {
+      for(var video of videoDetails) {
         //video
-        if(video.snippet.liveBroadcastContent == 'none') {
+        if(video.id.kind == 'youtube#video' && video.snippet.liveBroadcastContent == 'none') {
           console.log('normal');
           choices.push(new AudioTrack(audioTypes.youtube, video.id.videoId, video.snippet.title));
         }
         //live channel
-        else if(video.id.channelId && video.snippet.liveBroadcastContent == 'live') {
+        else if(video.id.kind == 'youtube#channel' && video.snippet.liveBroadcastContent == 'live') {
           console.log('live channel');
           choices.push(new AudioTrack(audioTypes.youtubeLiveChannel, video.id.channelId, video.snippet.title));
         }
         //live video
-        else if(video.id.videoId && video.snippet.liveBroadcastContent == 'live') {
+        else if(video.id.kind == 'youtube#video' && video.snippet.liveBroadcastContent == 'live') {
           console.log('live video');
           choices.push(new AudioTrack(audioTypes.youtubeLive, video.id.videoId, video.snippet.title));
         }
