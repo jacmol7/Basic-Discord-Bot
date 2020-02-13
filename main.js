@@ -74,14 +74,29 @@ function runCommand(msg) {
         commands.leave(msg, client);
         break;
 
+      case "audioTrackTest":
+        commands.audioTrackTest(msg, client);
+        break;
+
       case "play":
         commands.play(msg, client);
         break;
 
-      case "connections":
-        console.log(client.voiceConnections);
+      case "youtube":
+        commands.youtube(msg, client);
         break;
 
+      case "select":
+        commands.select(msg, client);
+        break;
+
+      case "next":
+        commands.next(msg, client);
+        break;
+
+      case "pause":
+        commands.pause(msg, client);
+        break;
     }
   }
 }
@@ -102,3 +117,4 @@ function hasPermission(msg) {
 }
 
 client.login(discordToken);
+commands.createAudioQueue(client);
