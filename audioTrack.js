@@ -38,6 +38,7 @@ class AudioTrack extends EventEmitter {
         return this.stream;
 
       case types.youtubeLiveChannel:
+        console.log('Playing live youtube channels is not supported');
         break;
 
       case types.file:
