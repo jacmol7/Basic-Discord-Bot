@@ -97,6 +97,10 @@ function runCommand(msg) {
       case "pause":
         commands.pause(msg, client);
         break;
+
+      case "stop":
+        commands.stop(msg, client);
+        break;
     }
   }
 }
